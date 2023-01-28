@@ -34,13 +34,32 @@ func main() {
 			fmt.Println(err)
 		}
 
-		splited_data := strings.Split(string(data[:count]), " ")
-		if splited_data[0] == "PING" {
-			if len(splited_data) == 1 {
-				conn.Write([]byte("PONG"))
-			} else {
-				conn.Write([]byte(strings.Join(splited_data[1:], " ")))
-			}
+		resp_array := get_resp_array(data[:count])
+		if resp_array[0] == "ping" {
+			conn.Write([]byte(ping(resp_array)))
 		}
 	}
+}
+
+func get_resp_array(data []byte) []string {
+	// 配列を解析する関数s
+	split_data := strings.Split(string(data), "\r\n")
+
+	// array_size, _ := strconv.Atoi(split_data[0][1:])
+	resp_array := []string{}
+
+	for _, d := range split_data[1:] {
+		if strings.Index(d, "$") == 0 || d == "" {
+			continue
+		}
+		resp_array = append(resp_array, d)
+	}
+	return resp_array
+}
+
+func ping(data []string) string {
+	if len(data) == 1 {
+		return "PONG"
+	}
+	return strings.Join(data[1:], " ")
 }
