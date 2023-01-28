@@ -59,7 +59,7 @@ func get_resp_array(data []byte) []string {
 
 func ping(data []string) string {
 	if len(data) == 1 {
-		return "PONG"
+		return "$4\r\nPONG\r\n"
 	}
 	return strings.Join(data[1:], " ")
 }
