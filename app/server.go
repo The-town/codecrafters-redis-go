@@ -42,7 +42,7 @@ func main() {
 }
 
 func get_resp_array(data []byte) []string {
-	// 配列を解析する関数s
+	// 配列を解析する関数
 	split_data := strings.Split(string(data), "\r\n")
 
 	// array_size, _ := strconv.Atoi(split_data[0][1:])
