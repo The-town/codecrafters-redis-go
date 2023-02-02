@@ -22,13 +22,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			fmt.Println("Error accepting connection: ", err.Error())
-			os.Exit(1)
-		}
+	conn, err := l.Accept()
+	if err != nil {
+		fmt.Println("Error accepting connection: ", err.Error())
+		os.Exit(1)
+	}
 
+	for {
 		data := make([]byte, 1024)
 		count, err := conn.Read(data)
 		if err != nil {
