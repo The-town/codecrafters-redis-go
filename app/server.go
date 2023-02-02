@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	// Uncomment this block to pass the first stage
@@ -54,6 +55,7 @@ func get_resp_array(data []byte) []string {
 		}
 		resp_array = append(resp_array, d)
 	}
+	log.Printf("resp array %v", resp_array)
 	return resp_array
 }
 
