@@ -30,6 +30,7 @@ func main() {
 		}
 
 		data := make([]byte, 1024)
+		log.Printf("resp array %v", data)
 		count, err := conn.Read(data)
 		if err != nil {
 			fmt.Println(err)
@@ -55,7 +56,6 @@ func get_resp_array(data []byte) []string {
 		}
 		resp_array = append(resp_array, d)
 	}
-	log.Printf("resp array %v", resp_array)
 	return resp_array
 }
 
