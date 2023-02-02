@@ -34,9 +34,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		log.Printf("resp array %v", string(data[:count]))
 		resp_array := get_resp_array(data[:count])
 		if resp_array[0] == "ping" {
+			log.Printf("resp array %v", resp_array)
 			conn.Write([]byte(ping(resp_array)))
 		}
 	}
