@@ -30,12 +30,11 @@ func main() {
 		}
 
 		data := make([]byte, 1024)
-		log.Printf("resp array %v", data)
 		count, err := conn.Read(data)
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		log.Printf("resp array %v", string(data[:count]))
 		resp_array := get_resp_array(data[:count])
 		if resp_array[0] == "ping" {
 			conn.Write([]byte(ping(resp_array)))
