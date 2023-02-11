@@ -29,7 +29,7 @@ func main() {
 		wg.Add(2)
 		channel := make(chan error)
 
-		for i := 0; i < 2; i++ {
+		for i := 0; i < 3; i++ {
 			go run_recieve_process(l, wg, channel)
 		}
 		wg.Wait()
