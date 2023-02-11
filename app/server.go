@@ -26,10 +26,10 @@ func main() {
 
 	for {
 		wg := new(sync.WaitGroup)
-		wg.Add(2)
+		wg.Add(10)
 		channel := make(chan error)
 
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 10; i++ {
 			go run_recieve_process(l, wg, channel)
 		}
 		wg.Wait()
