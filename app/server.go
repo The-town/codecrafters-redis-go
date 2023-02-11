@@ -23,7 +23,7 @@ func main() {
 		fmt.Println("Failed to bind to port 6379")
 		os.Exit(1)
 	}
-
+	// test
 	for {
 		wg := new(sync.WaitGroup)
 		wg.Add(10)
