@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	// Uncomment this block to pass the first stage
 	"net"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -22,24 +24,61 @@ func main() {
 		os.Exit(1)
 	}
 
+	for {
+		wg := new(sync.WaitGroup)
+		wg.Add(2)
+		channel := make(chan error)
+
+		for i := 0; i < 2; i++ {
+			go run_recieve_process(l, wg, channel)
+		}
+		wg.Wait()
+	}
+}
+
+func run_recieve_process(l net.Listener, wg *sync.WaitGroup, channel chan error) {
+
+	conn := get_connection(l)
+	for {
+		log.Printf("conn %v", conn)
+		err := recieve_data(conn, l)
+
+		if err != nil {
+			conn.Close()
+			log.Println(err)
+			break
+		}
+	}
+	wg.Done()
+}
+
+func get_connection(l net.Listener) net.Conn {
 	conn, err := l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
 
-	for {
-		data := make([]byte, 1024)
-		count, err := conn.Read(data)
-		if err != nil {
-			fmt.Println(err)
-		}
-		resp_array := get_resp_array(data[:count])
-		if resp_array[0] == "ping" {
-			log.Printf("resp array %v", resp_array)
-			conn.Write([]byte(ping(resp_array)))
-		}
+	return conn
+}
+
+func recieve_data(conn net.Conn, l net.Listener) error {
+
+	data := make([]byte, 1024)
+	count, err := conn.Read(data)
+	if err != nil {
+		return err
 	}
+
+	resp_array := get_resp_array(data[:count])
+	if len(resp_array) == 0 {
+		return errors.New("no array")
+	}
+	if resp_array[0] == "ping" {
+		log.Printf("resp array %v", resp_array)
+		conn.Write([]byte(ping(resp_array)))
+	}
+	return nil
 }
 
 func get_resp_array(data []byte) []string {
