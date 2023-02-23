@@ -77,7 +77,6 @@ func recieve_data(conn net.Conn, l net.Listener) error {
 	}
 
 	if resp_array[0] == "ping" {
-		log.Printf("resp array %v", resp_array)
 		conn.Write([]byte(ping(resp_array)))
 	}
 
