@@ -32,3 +32,23 @@ Note: This section is for stages 2 and beyond.
    in `app/server.go`.
 1. Commit your changes and run `git push origin master` to submit your solution
    to CodeCrafters. Test output will be streamed to your terminal.
+
+
+# メモ
+
+## Redisがコマンドを送る方法
+
+改行で区切っているので`LLEN mylist`というコマンドは以下のように送信される。
+```
+*2
+$4
+LLEN
+$6
+mylist
+```
+
+実際は改行文字列で表現されるから、以下のような感じになる。
+
+```
+*2\r\n$4\r\nLLEN\r\n$6\r\nmylist
+```

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	// Uncomment this block to pass the first stage
@@ -74,9 +75,18 @@ func recieve_data(conn net.Conn, l net.Listener) error {
 	if len(resp_array) == 0 {
 		return errors.New("no array")
 	}
+
 	if resp_array[0] == "ping" {
 		log.Printf("resp array %v", resp_array)
 		conn.Write([]byte(ping(resp_array)))
+	}
+
+	if strings.ToLower(resp_array[0]) == "echo" {
+		echo_result, err := echo(resp_array)
+		if err != nil {
+			return err
+		}
+		conn.Write([]byte(echo_result))
 	}
 	return nil
 }
@@ -102,4 +112,16 @@ func ping(data []string) string {
 		return "$4\r\nPONG\r\n"
 	}
 	return strings.Join(data[1:], " ")
+}
+
+func echo(data []string) (string, error) {
+	if len(data) != 2 {
+		return "", errors.New("Error ECHO not valid.")
+	}
+
+	bulk_string_length := "$" + strconv.Itoa(len(data[1]))
+	// 改行文字列が末尾にも必要なため、空白文字列を入れている。
+	echo_string := strings.Join([]string{bulk_string_length, data[1], ""}, "\r\n")
+
+	return echo_string, nil
 }
