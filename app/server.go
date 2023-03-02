@@ -13,6 +13,8 @@ import (
 	"sync"
 )
 
+var redis_map map[string]string = make(map[string]string)
+
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
@@ -35,6 +37,7 @@ func main() {
 		}
 		wg.Wait()
 	}
+
 }
 
 func run_recieve_process(l net.Listener, wg *sync.WaitGroup, channel chan error) {
@@ -87,6 +90,23 @@ func recieve_data(conn net.Conn, l net.Listener) error {
 		}
 		conn.Write([]byte(echo_result))
 	}
+
+	if strings.ToLower(resp_array[0]) == "set" {
+		set_result, err := set(resp_array, redis_map)
+		if err != nil {
+			return err
+		}
+		conn.Write([]byte(set_result))
+	}
+
+	if strings.ToLower(resp_array[0]) == "get" {
+		get_result, err := get(resp_array)
+		if err != nil {
+			return err
+		}
+		conn.Write([]byte(get_result))
+	}
+
 	return nil
 }
 
@@ -123,4 +143,25 @@ func echo(data []string) (string, error) {
 	echo_string := strings.Join([]string{bulk_string_length, data[1], ""}, "\r\n")
 
 	return echo_string, nil
+}
+
+func set(data []string, redis_map map[string]string) (string, error) {
+	if len(data) != 3 {
+		return "", errors.New("Error SET not valid")
+	}
+
+	redis_map[data[1]] = data[2]
+	return "+OK\r\n", nil
+}
+
+func get(data []string) (string, error) {
+	if len(data) != 2 {
+		return "", errors.New("Error GET not valid")
+	}
+
+	get_data := redis_map[data[1]]
+	bulk_string_length := "$" + strconv.Itoa(len(get_data))
+	// 改行文字列が末尾にも必要なため、空白文字列を入れている。
+	get_string := strings.Join([]string{bulk_string_length, get_data, ""}, "\r\n")
+	return get_string, nil
 }
