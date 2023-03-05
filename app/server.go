@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	// Uncomment this block to pass the first stage
 	"net"
@@ -13,7 +14,13 @@ import (
 	"sync"
 )
 
-var redis_map map[string]string = make(map[string]string)
+type SetValue struct {
+	Value   string
+	PX      int64
+	SetTime time.Time
+}
+
+var redis_map map[string]SetValue = make(map[string]SetValue)
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -145,12 +152,17 @@ func echo(data []string) (string, error) {
 	return echo_string, nil
 }
 
-func set(data []string, redis_map map[string]string) (string, error) {
-	if len(data) != 3 {
+func set(data []string, redis_map map[string]SetValue) (string, error) {
+	if len(data) < 3 {
 		return "", errors.New("Error SET not valid")
 	}
 
-	redis_map[data[1]] = data[2]
+	var px int64
+	if len(data) == 5 && data[3] == "PX" {
+		px, _ = strconv.ParseInt(data[4], 10, 64)
+	}
+
+	redis_map[data[1]] = SetValue{Value: data[2], PX: px, SetTime: time.Now()}
 	return "+OK\r\n", nil
 }
 
@@ -160,8 +172,16 @@ func get(data []string) (string, error) {
 	}
 
 	get_data := redis_map[data[1]]
-	bulk_string_length := "$" + strconv.Itoa(len(get_data))
+
+	time_diff := time.Now().Sub(get_data.SetTime)
+	log.Printf("time diff: %v", time_diff.Milliseconds())
+	log.Printf("PX: %v", get_data.PX)
+	if time_diff.Milliseconds() > get_data.PX && get_data.PX != 0 {
+		return "$-1\r\n", nil
+	}
+
+	bulk_string_length := "$" + strconv.Itoa(len(get_data.Value))
 	// 改行文字列が末尾にも必要なため、空白文字列を入れている。
-	get_string := strings.Join([]string{bulk_string_length, get_data, ""}, "\r\n")
+	get_string := strings.Join([]string{bulk_string_length, get_data.Value, ""}, "\r\n")
 	return get_string, nil
 }
