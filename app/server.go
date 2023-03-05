@@ -158,7 +158,7 @@ func set(data []string, redis_map map[string]SetValue) (string, error) {
 	}
 
 	var px int64
-	if len(data) == 5 && data[3] == "PX" {
+	if len(data) == 5 && strings.ToLower(data[3]) == "px" {
 		px, _ = strconv.ParseInt(data[4], 10, 64)
 	}
 
